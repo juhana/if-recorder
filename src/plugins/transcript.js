@@ -1,9 +1,28 @@
 /**
- * TRANSCRIPT SAVING
- */
+Parchment Transcript Recording Plugin
+	* Version 0.1
+	* URL: http://code.google.com/p/parchment-transcript/
+	* Description: Parchment Transcript Recording Plugin sends transcripts of games being played on Parchment web interpreter to a remote server.
+	* Author: Juhana Leinonen
+	* Copyright: Copyright (c) 2011 Juhana Leinonen under MIT license.
+**/
+
+
+/* make sure the modified zui.js is loaded */
+parchment.vms.gnusto.files = /* DEBUG */ [
+				'../../parchment/src/gnusto/engine/gnusto-engine.js',
+				'../../parchment/src/plugins/quetzal.js',
+				'../../parchment/src/gnusto/runner/runner.js',
+				'../../parchment/src/gnusto/runner/console.js',
+				'../src/gnusto/runner/zui.js'
+			] /* ELSEDEBUG [
+				'gnusto.min.js',
+				'zmachine.min.js'
+			] /* ENDDEBUG */;
+
 
 $( document ).ready(function(){
-
+	
 parchment.transcript = {
 		sessionId: (new Date().getTime())+""+( Math.ceil( Math.random() * 1000 ) ),
 		command: { input: '', timestamp: 0 },
@@ -37,7 +56,6 @@ parchment.transcript = {
 					{
 					   'session': this.sessionId,
 					   'log': {
-					         'time': this.command.timeStamp,
 					         'inputcount': this.inputcount,
 					         'outputcount': this.outputcount,
 					         'input': this.command.input,
@@ -117,7 +135,8 @@ parchment.transcript = {
 /* save commands when Parchment calls the hooks in [z]ui.js */
 $( document ).bind( 
 		'LineInput', 
-		function( command ) { 
+		function( command ) {
+//			console.log( 'cmd: '+command.toSource() );
 			parchment.transcript.command = command;
 			parchment.transcript.inputcount++;
 		} 
@@ -126,7 +145,9 @@ $( document ).bind(
 $( document ).bind( 
 		'CharInput', 
 		function( char ) { 
-			parchment.transcript.command = char.charCode;
+//			console.log( 'charcmd: '+char.toSource() );
+			parchment.transcript.command = char;
+			parchment.transcript.command.input = String.fromCharCode( char.input.keyCode ); // TODO: Handle non-alphabet input like arrow keys
 			parchment.transcript.inputcount++;
 		} 
 	);
