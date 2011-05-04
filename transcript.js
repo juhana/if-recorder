@@ -7,18 +7,6 @@ Parchment Transcript Recording Plugin
 	* Copyright: Copyright (c) 2011 Juhana Leinonen under MIT license.
 **/
 
-/* make sure the modified zui.js is loaded */
-parchment.vms.gnusto.files = /* DEBUG */ [
-				'../src/gnusto/engine/gnusto-engine.js',
-				'../src/plugins/quetzal.js',
-				'../src/gnusto/runner/runner.js',
-				'../src/gnusto/runner/console.js',
-				'../../parchment-transcript/src/gnusto/runner/zui.js'
-			] /* ELSEDEBUG [
-				'gnusto.min.js',
-				'zmachine.min.js'
-			] /* ENDDEBUG */;
-
 $( document ).ready(function(){
 	
 parchment.transcript = {
@@ -64,7 +52,7 @@ parchment.transcript = {
 					}
 			);
 			
-			console.log( "JSON: "+jsonData );
+			// console.log( "JSON: "+jsonData );
 			
 			$.ajax( {
 				type: 'POST',
@@ -100,18 +88,21 @@ parchment.transcript = {
 			}
 			
 			var browserString = $.browser.name+' '+$.browser.version+' '+$.os.name; 
+
+			var engine = 'Quixe';
+			if( parchment.lib.Story.zcode ) {
+				engine = 'Gnusto';
+			}
 			
 			var initString = $.toJSON( {
 					'session': this.sessionId,
 					'start': {
 						'story': this.storyUrl,
-						'interpreter': 'Parchment',	// TODO: Does Parchment have version numbers? 
+						'interpreter': 'Parchment / '+engine,	// TODO: Does Parchment have version numbers? 
 						'browser': browserString
 					}
 				}
 			);
-			
-			console.log( initString );
 			
 			$.ajax( {
 				type: 'POST',
