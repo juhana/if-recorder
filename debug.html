@@ -15,9 +15,9 @@
 	<script src="../parchment/src/parchment/quixe.js"></script>
 	<script src="../parchment/src/parchment/gnusto.js"></script>
 	<script src="../parchment/src/parchment/outro.js"></script>
-	<script src="src/plugins/jquery.json-2.2.min.js"></script>
-	<script src="src/plugins/jquery.browser.min.js"></script>
-	<script src="src/plugins/transcript.js"></script>
+	<script src="lib/jquery.json-2.2.min.js"></script>
+	<script src="lib/jquery.browser.min.js"></script>
+	<script src="transcript.js"></script>
 	<link rel="stylesheet" type="text/css" href="../parchment/parchment.css">
 	<meta name="viewport" content="width=device-width,user-scalable=no">
 	</head>
@@ -28,5 +28,13 @@
 		<noscript><p>Parchment requires Javascript. Please enable it in your browser.</p></noscript>
 	</div>
 	<div id="parchment"></div>
+	<script type="text/javascript">
+		parchment.options.lib_path = '../parchment/lib/';
+		
+		$( document ).ready(function(){
+			// start transcript saving
+			parchment.transcript.initialize( 'tools/server/save-sql.php' );
+		});
+	</script>
 </body>
 </html>
