@@ -5,7 +5,7 @@
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="Robots" content="noindex,nofollow" />
-<link rel="stylesheet" type="text/css" href="../../../../parchment.css">
+<link rel="stylesheet" type="text/css" href="../../../../../parchment/parchment.css">
 <link rel="stylesheet" type="text/css" href="transcript.css">
 
 </head>
@@ -19,7 +19,7 @@ include_once( '../db.php' );
 $session = $_GET[ 'session' ];
 $prevInputCount = 0;
 
-$query = $db->prepare( 'SELECT * FROM transcripts WHERE session = ? AND window = 0 ORDER BY outputcount ASC' );
+$query = $db->prepare( 'SELECT * FROM transcripts WHERE session = ? ORDER BY outputcount ASC' );
 $query->execute( array( $session ) ) or database_error( $query->errorInfo() );
 
 $rows = $query->fetchAll();
@@ -30,9 +30,11 @@ foreach( $rows as $snippet ) {
 		$prevInputCount = $snippet[ 'inputcount' ];
 	}
 	
-	echo '<span class="'.$snippet[ 'styles' ].'">';
-	echo nl2br( str_replace( '  ', '&nbsp; ', str_replace( '  ', '&nbsp; ', $snippet[ 'output' ] ) ) );
-	echo '</span>';
+	if( $snippet[ 'window' ] == 0 ) {
+		echo '<span class="'.$snippet[ 'styles' ].'">';
+		echo nl2br( str_replace( '  ', '&nbsp; ', str_replace( '  ', '&nbsp; ', $snippet[ 'output' ] ) ) );
+		echo '</span>';
+	}
 }
 
 ?>
