@@ -1,6 +1,6 @@
 /**
 Parchment Transcript Recording Plugin
-	* Version 0.1
+	* Version 1.0
 	* URL: http://code.google.com/p/parchment-transcript/
 	* Description: Parchment Transcript Recording Plugin sends transcripts of games being played on Parchment web interpreter to a remote server.
 	* Author: Juhana Leinonen
@@ -33,9 +33,19 @@ parchment.transcript = {
 		// is the transcript saving server offline?
 		serverOffline: false,
 		
-		send: function() {
+		send: function( window, styles, text ) {
 			if( !this.collectTranscripts() ) {
 				return;
+			}
+			
+			if( typeof( window ) != 'undefined' ) {
+				this.window = window;
+			}
+			if( typeof( styles ) != 'undefined' ) {
+				this.styles = styles;
+			}
+			if( typeof( text ) != 'undefined' ) {
+				this.output = text;
 			}
 			
 			var jsonData = $.toJSON( 
@@ -116,8 +126,33 @@ parchment.transcript = {
 					this.serverOffline = ( data.toLowerCase() != 'ok' );
 				}
 			} );
-			
+				
 			return true;
+		},
+		
+		charName: function( keyCode ) {
+			switch( keyCode ) {
+				case 8:
+					return '<backspace>';
+				case 9:
+					return '<tab>';
+				case 13:
+					return '<enter>';
+				case 27:
+					return '<esc>';
+				case 37:
+					return '<left>';
+				case 38:
+					return '<up>';
+				case 39:
+					return '<right>';
+				case 40:
+					return '<down>';
+				case 46:
+					return '<del>';
+				default:
+					return String.fromCharCode( keyCode );
+			}
 		}
 };
 
@@ -136,20 +171,70 @@ $( document ).bind(
 		function( command ) { 
 //			console.log( 'charcmd: '+command.toSource() );
 			parchment.transcript.command = command;
-			parchment.transcript.command.input = String.fromCharCode( command.input.keyCode ); // TODO: Handle non-alphabet input like arrow keys
+			parchment.transcript.command.input = parchment.transcript.charName( command.input.keyCode ); // TODO: Handle non-alphabet input like arrow keys
 			parchment.transcript.inputcount++;
 		} 
 	);
 
+// Sending main game texts to the recorder.
+// Status line is saved by the modified Console.renderHtml().
 $( document ).bind(
 		'TextOutput',
 		function( data ) {
-			parchment.transcript.output += data.output.text;
-			parchment.transcript.window = data.output.window;
-			parchment.transcript.styles = data.output.styles;
-			parchment.transcript.send();
+			if( data.output.window == 0 ) {
+				parchment.transcript.send( data.output.window, data.output.styles, data.output.text );
+			}
 		}
 );
+
+
+/*
+ * We need to modify Gnusto runner to get the final formatting of the status line.
+ * Since Parchment loads some library files asynchronously we'll have to wait until
+ * the runner.js file is loaded. When we reach the TextOutput function for the first
+ * time we the file has been loaded and the first status line has not yet been printed.
+ * 
+ * As far as I can tell Console.renderHtml is called only when building the status line,
+ * so we can safely (?) set the window to 1 (status line) when sending this text to
+ * the transcript recorder. 
+ * 
+ * (There must be a better way to do this, but this works so it'll have to suffice.)
+ */
+
+var firstTextOutputHandler = function( data ) {
+	Console.prototype.renderHtml = function() {
+    var string = "";
+    var currString = "";
+    for (var y = 0; y < this.height; y++) {
+      var currStyle = null;
+      for (var x = 0; x < this.width; x++) {
+        if (this._styles[y][x] !== currStyle) {
+          if (currStyle !== null)
+            string += "</span>";
+          currStyle = this._styles[y][x];
+          if (currStyle !== null) {
+            string += '<span class="' + currStyle + '">';
+			parchment.transcript.send( 1, currStyle, currString.replace( /\&nbsp\;/gi, ' ') );
+			currString = '';
+          }
+        }
+        string += this._characters[y][x];
+        currString += this._characters[y][x];
+      }
+      if (currStyle !== null) {
+        string += "</span>";
+		parchment.transcript.send( 1, currStyle, currString.replace( /\&nbsp\;/gi, ' ' )+"\n" );
+		currString = '';
+      }
+      string += "<br/>";
+    }
+    return string;
+  };
+	// remove the handler, no need to run more than once
+	$( document ).unbind( 'TextOutput', firstTextOutputHandler );
+};
+
+$( document ).bind( 'TextOutput', firstTextOutputHandler );
 
 
 /* source: http://jquery-howto.blogspot.com/2009/09/get-url-parameters-values-with-jquery.html */
