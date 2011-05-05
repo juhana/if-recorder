@@ -60,7 +60,7 @@ foreach( $rows as $snippet ) {
 	// When input count increments, we've started a new turn.
 	if( $prevInputCount != $snippet[ 'inputcount' ] ) {
 		if( !empty( $statusLineText ) && $statusLine == 'inline' ) {
-			echo '<div>';
+			echo '<div class="statusline">';	// the extra class will instruct the browser to use fixed-width font
 			echo $statusLineText;
 			echo '</div>';
 		}
@@ -86,7 +86,7 @@ foreach( $rows as $snippet ) {
 
 // flush the final text
 if( !empty( $statusLineText ) && $statusLine == 'inline' ) {
-	echo '<div>';
+	echo '<div class="statusline">';
 	echo $statusLineText;
 	echo '</div>';
 }

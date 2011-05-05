@@ -1,9 +1,14 @@
 #transcript {
-	width:600px;
+	width:640px;
 	margin:0 auto;
 }
 
 .command {
 	font-weight:bold;
 	color:#527820;
+}
+
+.statusline {
+    font-family: monaco, andale mono, lucidatypewriter, courier, courier new, monospace;
+    font-size: 10pt;
 }
