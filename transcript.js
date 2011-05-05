@@ -140,6 +140,8 @@ parchment.transcript = {
 					return '<enter>';
 				case 27:
 					return '<esc>';
+				case 32:
+					return '<space>';
 				case 37:
 					return '<left>';
 				case 38:
