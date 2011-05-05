@@ -211,13 +211,14 @@ var firstTextOutputHandler = function( data ) {
       var currStyle = null;
       for (var x = 0; x < this.width; x++) {
         if (this._styles[y][x] !== currStyle) {
-          if (currStyle !== null)
+          if (currStyle !== null) {
+  			parchment.transcript.send( 1, currStyle, currString.replace( /\&nbsp\;/gi, ' ') );
+			currString = '';
             string += "</span>";
+          }
           currStyle = this._styles[y][x];
           if (currStyle !== null) {
             string += '<span class="' + currStyle + '">';
-			parchment.transcript.send( 1, currStyle, currString.replace( /\&nbsp\;/gi, ' ') );
-			currString = '';
           }
         }
         string += this._characters[y][x];
