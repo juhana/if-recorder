@@ -55,8 +55,7 @@ if( !empty( $data[ 'start' ] ) ) {
 		die( 'Story identifier missing' );
 	}
 	
-	// check if the session data is already in the database,
-	// save if not
+	// check if the session data is already in the database, save if not
 	$query = $db->prepare(
 		"SELECT COUNT(*) as count FROM {$dbSettings[ 'prefix' ]}stories 
 			WHERE session = ?"
@@ -105,6 +104,13 @@ if( !empty( $data[ 'start' ] ) ) {
 
 /* Saving transcript pieces the database */
 if( !empty( $data[ 'log' ] ) ) {
+	if( !empty( $data[ 'log' ][ 'timestamp' ] ) ) {
+		$timestamp = date( 'Y-m-d H:i:s', round( $data[ 'log' ][ 'timestamp' ] / 1000 ) );
+	}
+	else {
+		$timestamp = '';
+	}
+	
 	$insert = $db->prepare( 
 		"INSERT INTO {$dbSettings[ 'prefix' ]}transcripts 
 		SET session = ?,
@@ -113,7 +119,8 @@ if( !empty( $data[ 'log' ] ) ) {
 			window = ?,
 			styles = ?,
 			inputcount = ?,
-			outputcount = ?"
+			outputcount = ?,
+			timestamp = ?"
 	);
 	
 	if( !$insert->execute(
@@ -124,11 +131,29 @@ if( !empty( $data[ 'log' ] ) ) {
 			$data[ 'log' ][ 'window' ],
 			$data[ 'log' ][ 'styles' ],
 			$data[ 'log' ][ 'inputcount' ],
-			$data[ 'log' ][ 'outputcount' ]
+			$data[ 'log' ][ 'outputcount' ],
+			$timestamp
 		)
 	) ) {
 		server_error( 'Error saving log data: '.print_r( $insert->errorInfo(), true ) );
 	}
+	
+	// Update story information. The "ended" counter is updated as transcript
+	// pieces are saved.
+	$storyupdate = $db->prepare(
+		"UPDATE {$dbSettings[ 'prefix' ]}stories 
+		SET ended = IF( ended < :timestamp, :timestamp, ended ),
+			inputcount = IF( inputcount < :count, :count, inputcount ),
+		WHERE session = :session"
+	);
+	
+	$storyupdate->execute(
+		array(
+			':timestamp'	=> $timestamp,
+			':count'		=> $data[ 'log' ][ 'inputcount' ],
+			':session'		=> $data[ 'session' ]
+		)
+	);
 }
 
 die( 'OK' );

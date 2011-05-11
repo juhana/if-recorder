@@ -11,4 +11,5 @@
 .statusline {
     font-family: monaco, andale mono, lucidatypewriter, courier, courier new, monospace;
     font-size: 10pt;
+    line-height:1.3em;
 }

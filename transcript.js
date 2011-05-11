@@ -7,8 +7,6 @@ Parchment Transcript Recording Plugin
 	* Copyright: Copyright (c) 2011 Juhana Leinonen under MIT license.
 **/
 
-$( document ).ready(function(){
-	
 parchment.transcript = {
 		sessionId: (new Date().getTime())+""+( Math.ceil( Math.random() * 1000 ) ),
 		command: { input: '', timestamp: 0 },
@@ -25,7 +23,7 @@ parchment.transcript = {
 		outputcount: 1,
 		styles: '',
 		saveUrl: '',
-		storyUrl: getUrlVars()[ 'story' ],	// TODO: handle games not in the url
+		storyUrl: '',
 
 		// the player can opt out by having feedback=0 in the url
 		optOut: ( typeof( getUrlVars()[ 'feedback' ] ) != 'undefined' && getUrlVars()[ 'feedback' ] != '1' ),
@@ -57,7 +55,8 @@ parchment.transcript = {
 					         'input': this.command.input,
 					         'output': this.output,
 					         'window': this.window,
-					         'styles': this.styles
+					         'styles': this.styles,
+					         'timestamp': new Date().getTime()
 					      }
 					}
 			);
@@ -91,6 +90,15 @@ parchment.transcript = {
 		initialize: function( url ) {
 			if( typeof( url ) == 'string' ) {
 				this.saveUrl = url;
+			}
+			
+			if( this.storyUrl == '' ) {
+				if( parchment.options.default_story ) {
+					this.storyUrl = parchment.options.default_story;
+				}
+				else {
+					this.storyUrl = getUrlVars()[ 'story' ];
+				} 
 			}
 			
 			if( !this.collectTranscripts() ) {
@@ -155,8 +163,13 @@ parchment.transcript = {
 				default:
 					return String.fromCharCode( keyCode );
 			}
-		}
+		},
+		
+		manualTranscriptMsg: "This story does not support saving transcripts manually."
 };
+
+
+$( document ).ready(function(){
 
 /* save commands when Parchment calls the hooks in [z]ui.js */
 $( document ).bind( 
@@ -173,7 +186,7 @@ $( document ).bind(
 		function( command ) { 
 //			console.log( 'charcmd: '+command.toSource() );
 			parchment.transcript.command = command;
-			parchment.transcript.command.input = parchment.transcript.charName( command.input.keyCode ); // TODO: Handle non-alphabet input like arrow keys
+			parchment.transcript.command.input = parchment.transcript.charName( command.input.keyCode );
 			parchment.transcript.inputcount++;
 		} 
 	);
@@ -233,11 +246,22 @@ var firstTextOutputHandler = function( data ) {
     }
     return string;
   };
+  
+  parchment.vms.gnusto.onFlagsChanged = function( isToTranscript, isFixedWidth ) {
+      if (isToTranscript) {
+    	  this.onPrint( parchment.transcript.manualTranscriptMsg );
+      }
+      this._isFixedWidth = isFixedWidth;
+  };
+    
 	// remove the handler, no need to run more than once
 	$( document ).unbind( 'TextOutput', firstTextOutputHandler );
 };
 
 $( document ).bind( 'TextOutput', firstTextOutputHandler );
+
+
+});
 
 
 /* source: http://jquery-howto.blogspot.com/2009/09/get-url-parameters-values-with-jquery.html */
@@ -253,5 +277,3 @@ function getUrlVars()
     }
     return vars;
 }
-
-});

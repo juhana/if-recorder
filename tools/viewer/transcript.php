@@ -42,7 +42,6 @@ $prevOutputCount = 0;
 
 $gameText = '';
 $statusLineText = '';
-$outputSnippet = '';
 
 $query = $db->prepare( 'SELECT * FROM transcripts WHERE session = ? ORDER BY outputcount ASC' );
 $query->execute( array( $session ) ) or database_error( $query->errorInfo() );
@@ -67,20 +66,20 @@ foreach( $rows as $snippet ) {
 		echo $gameText; 
 		$gameText = '';
 		$statusLineText = '';
-		echo '<span class="command">'.htmlentities( $snippet[ 'input' ] ).'</span><br />';
+		echo '<span class="command" id="command-'.$snippet[ 'inputcount' ].'">'.htmlentities( $snippet[ 'input' ] ).'</span><br />';
 		$prevInputCount = $snippet[ 'inputcount' ];
 	}
-	
-	$outputSnippet = '<span class="'.$snippet[ 'styles' ].'">';
-	$outputSnippet .= nl2br( str_replace( '  ', '&nbsp; ', str_replace( '  ', '&nbsp; ', htmlentities( $snippet[ 'output' ] ) ) ) );
-	$outputSnippet .= '</span>';
 
 	if( $snippet[ 'window' ] == 0 ) {
-		$gameText .= $outputSnippet;
+		$gameText .= '<span class="'.$snippet[ 'styles' ].'">';
+		$gameText .= nl2br( str_replace( '  ', '&nbsp; ', str_replace( '  ', '&nbsp; ', htmlentities( $snippet[ 'output' ] ) ) ) );
+		$gameText .= '</span>';
 	}
 	
 	if( $snippet[ 'window' ] == 1 ) {
-		$statusLineText .= $outputSnippet; 
+		$statusLineText .= '<span class="'.$snippet[ 'styles' ].'">';
+		$statusLineText .= nl2br( str_replace( ' ', '&nbsp;', htmlentities( $snippet[ 'output' ] ) ) );
+		$statusLineText .= '</span>';
 	}
 }
 
