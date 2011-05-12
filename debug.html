@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Parchment</title>
 	<script src="../parchment/src/lib/jquery.js"></script>
 	<script src="../parchment/src/lib/class.js"></script>
@@ -31,11 +31,7 @@
 	<div id="parchment"></div>
 	<script type="text/javascript">
 		parchment.options.lib_path = '../parchment/lib/';
-		
-		$( document ).ready(function(){
-			// start transcript saving
-			parchment.transcript.initialize( 'tools/server/save-sql.php' );
-		});
+		parchment.options.default_story = '../games/revolution.zblorb';
 	</script>
 </body>
 </html>

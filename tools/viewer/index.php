@@ -59,7 +59,7 @@ else {
 		 '">'.
 		 $q[ 'story' ].
 		 '</a>'.
-		 " ({$q[ 'started' ]}; {$q[ 'inputcount' ]} turns)";
+		 " ({$q[ 'started' ]}; {$q[ 'inputcount' ]} turn".( $q[ 'inputcount' ] != 1 ? 's' : '' ).")";
 	 	echo '</li>';
 	}
 	

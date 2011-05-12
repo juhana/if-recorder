@@ -9,17 +9,18 @@ CREATE TABLE `stories` (
   `story` varchar(255) NOT NULL,
   `started` datetime DEFAULT NULL,
   `ended` datetime DEFAULT NULL,
+  `inputcount` int(11) DEFAULT '0',
   `browser` varchar(255) DEFAULT NULL,
   `interpreter` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8 ;
 
 
-
 CREATE TABLE `transcripts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `session` varchar(255) NOT NULL,
   `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `timestamp` timestamp NULL DEFAULT NULL,
   `output` text NOT NULL,
   `input` varchar(255) NOT NULL,
   `turncount` int(11) DEFAULT NULL,
@@ -29,5 +30,4 @@ CREATE TABLE `transcripts` (
   `styles` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8 ;
-
 

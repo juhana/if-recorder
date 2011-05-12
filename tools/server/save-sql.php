@@ -88,7 +88,7 @@ if( !empty( $data[ 'start' ] ) ) {
 			$browser = $data[ 'start' ][ 'browser' ];
 		}
 		
-		if( !$insert->execute( 
+		$insert->execute( 
 			array(
 				$data[ 'session' ],
 				$data[ 'start' ][ 'story' ],
@@ -96,9 +96,7 @@ if( !empty( $data[ 'start' ] ) ) {
 				$browser,
 				date( 'Y-m-d H:i:s' )
 			)
-		) ) {
-			server_error( 'Error saving startup data: '.print_r( $insert->errorInfo(), true ) );
-		}
+		) or server_error( 'Error saving startup data: '.print_r( $insert->errorInfo(), true ) );
 	}
 }
 
@@ -123,7 +121,7 @@ if( !empty( $data[ 'log' ] ) ) {
 			timestamp = ?"
 	);
 	
-	if( !$insert->execute(
+	$insert->execute(
 		array(
 			$data[ 'session' ],
 			$data[ 'log' ][ 'input' ],
@@ -134,16 +132,15 @@ if( !empty( $data[ 'log' ] ) ) {
 			$data[ 'log' ][ 'outputcount' ],
 			$timestamp
 		)
-	) ) {
-		server_error( 'Error saving log data: '.print_r( $insert->errorInfo(), true ) );
-	}
+	) or server_error( 'Error saving log data: '.print_r( $insert->errorInfo(), true ) );
+	
 	
 	// Update story information. The "ended" counter is updated as transcript
 	// pieces are saved.
 	$storyupdate = $db->prepare(
 		"UPDATE {$dbSettings[ 'prefix' ]}stories 
 		SET ended = IF( ended < :timestamp, :timestamp, ended ),
-			inputcount = IF( inputcount < :count, :count, inputcount ),
+			inputcount = IF( inputcount < :count, :count, inputcount )
 		WHERE session = :session"
 	);
 	
@@ -153,7 +150,7 @@ if( !empty( $data[ 'log' ] ) ) {
 			':count'		=> $data[ 'log' ][ 'inputcount' ],
 			':session'		=> $data[ 'session' ]
 		)
-	);
+	) or server_error( 'Error updating story data: '.print_r( $storyupdate->errorInfo(), true ) );
 }
 
 die( 'OK' );

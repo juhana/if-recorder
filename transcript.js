@@ -23,7 +23,7 @@ parchment.transcript = {
 		outputcount: 1,
 		styles: '',
 		saveUrl: '',
-		storyUrl: '',
+		story: '',
 
 		// the player can opt out by having feedback=0 in the url
 		optOut: ( typeof( getUrlVars()[ 'feedback' ] ) != 'undefined' && getUrlVars()[ 'feedback' ] != '1' ),
@@ -92,12 +92,12 @@ parchment.transcript = {
 				this.saveUrl = url;
 			}
 			
-			if( this.storyUrl == '' ) {
+			if( this.story == '' ) {
 				if( parchment.options.default_story ) {
-					this.storyUrl = parchment.options.default_story;
+					this.story = parchment.options.default_story;
 				}
 				else {
-					this.storyUrl = getUrlVars()[ 'story' ];
+					this.story = getUrlVars()[ 'story' ];
 				} 
 			}
 			
@@ -107,16 +107,18 @@ parchment.transcript = {
 			
 			var browserString = $.browser.name+' '+$.browser.version+' '+$.os.name; 
 
-			var engine = 'Quixe';
-			if( parchment.lib.Story.zcode ) {
-				engine = 'Gnusto';
-			}
+			// there doesn't seem to be an easy way to find out which engine
+			// is or will be running at this point. 
+			/* var engine = '';
+			if( typeof( ENGINE_DESCRIPTION ) != 'undefined' ) {
+				engine = ENGINE_DESCRIPTION;
+			} */
 			
 			var initString = $.toJSON( {
 					'session': this.sessionId,
 					'start': {
-						'story': this.storyUrl,
-						'interpreter': 'Parchment / '+engine,	// TODO: Does Parchment have version numbers? 
+						'story': this.story,
+						'interpreter': 'Parchment',	// TODO: Does Parchment have version numbers? 
 						'browser': browserString
 					}
 				}
