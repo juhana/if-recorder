@@ -32,30 +32,32 @@ parchment.transcript = {
 		serverOffline: false,
 		
 		send: function( window, styles, text ) {
+			var self = this;
+			
 			if( !this.collectTranscripts() ) {
 				return;
 			}
 			
 			if( typeof( window ) != 'undefined' ) {
-				this.window = window;
+				self.window = window;
 			}
 			if( typeof( styles ) != 'undefined' ) {
-				this.styles = styles;
+				self.styles = styles;
 			}
 			if( typeof( text ) != 'undefined' ) {
-				this.output = text;
+				self.output = text;
 			}
 			
 			var jsonData = $.toJSON( 
 					{
-					   'session': this.sessionId,
+					   'session': self.sessionId,
 					   'log': {
-					         'inputcount': this.inputcount,
-					         'outputcount': this.outputcount,
-					         'input': this.command.input,
-					         'output': this.output,
-					         'window': this.window,
-					         'styles': this.styles,
+					         'inputcount': self.inputcount,
+					         'outputcount': self.outputcount,
+					         'input': self.command.input,
+					         'output': self.output,
+					         'window': self.window,
+					         'styles': self.styles,
 					         'timestamp': new Date().getTime()
 					      }
 					}
@@ -65,13 +67,13 @@ parchment.transcript = {
 			
 			$.ajax( {
 				type: 'POST',
-				url: this.saveUrl,
+				url: self.saveUrl,
 				data: { data: jsonData }			
 			} );
 
 			// clearing the buffer for next turn
-			this.output = '';
-			this.outputcount++;
+			self.output = '';
+			self.outputcount++;
 		},
 		
 		/*
@@ -88,20 +90,34 @@ parchment.transcript = {
 		},
 		
 		initialize: function( url ) {
-			if( typeof( url ) == 'string' ) {
-				this.saveUrl = url;
-			}
+			var self = this;
 			
-			if( this.story == '' ) {
-				if( parchment.options.default_story ) {
-					this.story = parchment.options.default_story;
+			if( typeof( url ) == 'string' ) {
+				self.saveUrl = url;
+			}
+
+			// If story name hasn't been given, set it to the file name.
+			// This will not work with the archive search thing.
+			if( self.story == '' ) {
+				if( typeof( parchment.options.default_story ) != 'unknown' && parchment.options.default_story != '' ) {
+					self.story = parchment.options.default_story;
+					
+					if( !parchment.options.lock_story && typeof( getUrlVars()[ 'story' ] ) != 'unknown' && getUrlVars()[ 'story' ] != '' ){
+						self.story = getUrlVars()[ 'story' ];
+					} 
 				}
 				else {
-					this.story = getUrlVars()[ 'story' ];
-				} 
+					if( !parchment.options.lock_story && typeof( getUrlVars()[ 'story' ] ) != 'unknown' ){
+						self.story = getUrlVars()[ 'story' ];
+					} 
+				}
 			}
 			
-			if( !this.collectTranscripts() ) {
+			if( self.story == '' ) {
+				self.story = '(unknown)';
+			}
+			
+			if( !self.collectTranscripts() ) {
 				return false;
 			}
 			
@@ -115,9 +131,9 @@ parchment.transcript = {
 			} */
 			
 			var initString = $.toJSON( {
-					'session': this.sessionId,
+					'session': self.sessionId,
 					'start': {
-						'story': this.story,
+						'story': self.story,
 						'interpreter': 'Parchment',	// TODO: Does Parchment have version numbers? 
 						'browser': browserString
 					}
@@ -126,14 +142,16 @@ parchment.transcript = {
 			
 			$.ajax( {
 				type: 'POST',
-				url: this.saveUrl,
+				url: self.saveUrl,
 				data: { data: initString },
 				// check what the server returns, flag it offline if not ok
 				error: function() {
-					this.serverOffline = true;
+					self.serverOffline = true;
 				},
 				success: function( data ) {
-					this.serverOffline = ( data.toLowerCase() != 'ok' );
+					if( data.toLowerCase() != 'ok' ) {
+						self.serverOffline = true;
+					}
 				}
 			} );
 				
@@ -249,21 +267,14 @@ var firstTextOutputHandler = function( data ) {
     return string;
   };
   
-  parchment.vms.gnusto.onFlagsChanged = function( isToTranscript, isFixedWidth ) {
-      if (isToTranscript) {
-    	  this.onPrint( parchment.transcript.manualTranscriptMsg );
-      }
-      this._isFixedWidth = isFixedWidth;
-  };
-    
 	// remove the handler, no need to run more than once
 	$( document ).unbind( 'TextOutput', firstTextOutputHandler );
 };
 
 $( document ).bind( 'TextOutput', firstTextOutputHandler );
 
-
 });
+
 
 
 /* source: http://jquery-howto.blogspot.com/2009/09/get-url-parameters-values-with-jquery.html */
