@@ -99,15 +99,15 @@ parchment.transcript = {
 			// If story name hasn't been given, set it to the file name.
 			// This will not work with the archive search thing.
 			if( self.story == '' ) {
-				if( typeof( parchment.options.default_story ) != 'unknown' && parchment.options.default_story != '' ) {
+				if( typeof( parchment.options.default_story ) != 'undefined' && parchment.options.default_story != '' ) {
 					self.story = parchment.options.default_story;
 					
-					if( !parchment.options.lock_story && typeof( getUrlVars()[ 'story' ] ) != 'unknown' && getUrlVars()[ 'story' ] != '' ){
+					if( !parchment.options.lock_story && typeof( getUrlVars()[ 'story' ] ) != 'undefined' && getUrlVars()[ 'story' ] != '' ){
 						self.story = getUrlVars()[ 'story' ];
 					} 
 				}
 				else {
-					if( !parchment.options.lock_story && typeof( getUrlVars()[ 'story' ] ) != 'unknown' ){
+					if( !parchment.options.lock_story && typeof( getUrlVars()[ 'story' ] ) != 'undefined' && getUrlVars()[ 'story' ] != '' ){
 						self.story = getUrlVars()[ 'story' ];
 					} 
 				}
@@ -115,6 +115,9 @@ parchment.transcript = {
 			
 			if( self.story == '' ) {
 				self.story = '(unknown)';
+			}
+			else {
+				console.log( 'story: '+self.story );
 			}
 			
 			if( !self.collectTranscripts() ) {
@@ -183,9 +186,7 @@ parchment.transcript = {
 				default:
 					return String.fromCharCode( keyCode );
 			}
-		},
-		
-		manualTranscriptMsg: "This story does not support saving transcripts manually."
+		}
 };
 
 
