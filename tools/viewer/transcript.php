@@ -6,6 +6,34 @@ Parchment Transcript Recording Plugin Database Viewer
 	* Author: Juhana Leinonen
 	* Copyright: Copyright (c) 2011 Juhana Leinonen under MIT license.
 **/ 
+
+// transcript session id
+$session = $_GET[ 'session' ];
+
+$options = array(
+	'warnings'		=> true,
+	'statusline'	=> 'inline',
+	'output'		=> 'html'
+);
+
+// show warnings?
+$options[ 'warnings' ] = !( isset( $_GET[ 'warnings' ] ) && $_GET[ 'warnings' ] == '0' );
+
+if( isset( $_GET[ 'statusline' ] ) ) {
+	$options[ 'statusline' ] = $_GET[ 'statusline' ];
+}
+
+if( isset( $_GET[ 'output' ] ) ) {
+	$options[ 'output' ] = $_GET[ 'output' ];
+}
+
+// tell the browser we're sending plaintext if so requested,
+// otherwise create the HTML page structure
+if( $options[ 'output' ] == 'text' ) {
+	header( "Content-type: text/plain" );
+}
+else {
+
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
@@ -21,78 +49,23 @@ Parchment Transcript Recording Plugin Database Viewer
 <body>
 <div id="transcript">
 
-<!--  <div style="width: 640px; line-height: 18px; left: 392.5px;" id="top-window" class="buffered-window"></div> -->
 <div id="content">
+
 <?php 
-include_once( '../db.php' );
-
-// session id
-$session = $_GET[ 'session' ];
-
-// show warnings?
-$warnings = !( isset( $_GET[ 'warnings' ] ) && $_GET[ 'warnings' ] == '0' );
-
-// status line
-$statusLine = 'inline';
-if( isset( $_GET[ 'statusline' ] ) ) {
-	$statusLine = $_GET[ 'statusline' ];
 }
 
-$prevInputCount = 0;
-$prevOutputCount = 0;
+define( 'INCLUDE_PATH', '../include/' );
 
-$gameText = '';
-$statusLineText = '';
+include_once( INCLUDE_PATH.'db.php' );
+include_once( INCLUDE_PATH.'view.php' );
 
-$query = $db->prepare( 'SELECT * FROM transcripts WHERE session = ? ORDER BY outputcount ASC' );
-$query->execute( array( $session ) ) or database_error( $query->errorInfo() );
 
-$rows = $query->fetchAll();
+echo display_transcript( $db, $session, $options );
 
-foreach( $rows as $snippet ) {
-	// The output count should be continuous. If we've skipped a count, inform the user.
-	if( $prevOutputCount < $snippet[ 'outputcount' ] - 1 && $warnings ) {
-		echo '<div class="error">WARNING: Possible gap in the transcript</div>';
-	}
-	
-	$prevOutputCount = $snippet[ 'outputcount' ];
-
-	// When input count increments, we've started a new turn.
-	if( $prevInputCount != $snippet[ 'inputcount' ] ) {
-		if( !empty( $statusLineText ) && $statusLine == 'inline' ) {
-			echo '<div class="statusline">';	// the extra class will instruct the browser to use fixed-width font
-			echo $statusLineText;
-			echo '</div>';
-		}
-		echo $gameText; 
-		$gameText = '';
-		$statusLineText = '';
-		echo '<span class="command" id="command-'.$snippet[ 'inputcount' ].'">'.htmlentities( $snippet[ 'input' ] ).'</span><br />';
-		$prevInputCount = $snippet[ 'inputcount' ];
-	}
-
-	if( $snippet[ 'window' ] == 0 ) {
-		$gameText .= '<span class="'.$snippet[ 'styles' ].'">';
-		$gameText .= nl2br( str_replace( '  ', '&nbsp; ', str_replace( '  ', '&nbsp; ', htmlentities( $snippet[ 'output' ] ) ) ) );
-		$gameText .= '</span>';
-	}
-	
-	if( $snippet[ 'window' ] == 1 ) {
-		$statusLineText .= '<span class="'.$snippet[ 'styles' ].'">';
-		$statusLineText .= nl2br( str_replace( ' ', '&nbsp;', htmlentities( $snippet[ 'output' ] ) ) );
-		$statusLineText .= '</span>';
-	}
-}
-
-// flush the final text
-if( !empty( $statusLineText ) && $statusLine == 'inline' ) {
-	echo '<div class="statusline">';
-	echo $statusLineText;
-	echo '</div>';
-}
-echo $gameText; 
+if( $options[ 'output' ] == 'html' ) {
 ?>
 </div>
 </div>
 </body>
-</html>
+</html><?php 
+}
