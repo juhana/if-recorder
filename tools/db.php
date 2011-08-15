@@ -24,6 +24,7 @@ try {
 	    	PDO::ATTR_PERSISTENT => true
 		)
 	);
+	$db->query( "SET NAMES 'utf8'" );
 } catch (PDOException $e) {
 	server_error( $e->getMessage() );
 }

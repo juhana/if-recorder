@@ -13,6 +13,7 @@ Parchment Transcript Recording Plugin Database Viewer
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="stylesheet" type="text/css" href="assets/parchment.css">
+<link rel="stylesheet" type="text/css" href="assets/glkote.css">
 <link rel="stylesheet" type="text/css" href="assets/transcript.css">
 
 </head>

@@ -33,6 +33,7 @@ parchment.transcript = {
 		
 		send: function( window, styles, text ) {
 			var self = this;
+			var $ = jQuery;	// prevents collisions with Prototype
 			
 			if( !this.collectTranscripts() ) {
 				return;
@@ -91,6 +92,7 @@ parchment.transcript = {
 		
 		initialize: function( url ) {
 			var self = this;
+			var $ = jQuery;	// prevents collisions with Prototype
 			
 			if( typeof( url ) == 'string' ) {
 				self.saveUrl = url;
@@ -190,7 +192,7 @@ parchment.transcript = {
 };
 
 
-$( document ).ready(function(){
+jQuery( document ).ready(function($){
 
 /* save commands when Parchment calls the hooks in [z]ui.js */
 $( document ).bind( 
@@ -222,6 +224,36 @@ $( document ).bind(
 			}
 		}
 );
+
+// Glk text output saving
+$( document ).bind(
+		'GlkOutput',
+		function( data ) {
+			for( var i = 0; i < data.output.size(); ++i ) {
+				console.log( 'i'+i+': '+data.output[ i ].toSource() );
+				
+				for( var j = 0; j < data.output[ i ].text.size(); ++j ) {
+					parchment.transcript.styles = '';
+					parchment.transcript.output = "\n";
+					
+					if( typeof( data.output[ i ].text[ j ].content ) != 'undefined' ) {
+						for( var k = 0; k < data.output[ i ].text[ j ].content.size(); k += 2 ) {
+							parchment.transcript.styles = data.output[ i ].text[ j ].content[ k ];
+							parchment.transcript.output = data.output[ i ].text[ j ].content[ k+1 ];
+							if( k == data.output[ i ].text[ j ].content.size() - 2 ) {
+								parchment.transcript.output += "\n";
+							}
+							parchment.transcript.send();
+						}
+					}
+					else {
+						parchment.transcript.send();
+					}
+				}
+			}
+		}
+);
+
 
 
 /*
