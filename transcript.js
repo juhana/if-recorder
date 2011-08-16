@@ -11,6 +11,7 @@ parchment.transcript = {
 		sessionId: (new Date().getTime())+""+( Math.ceil( Math.random() * 1000 ) ),
 		command: { input: '', timestamp: 0 },
 		output: '',
+		cache: [],
 		statusline: '',
 		window: 0,	// which window the transcript has been saved to
 
@@ -31,9 +32,11 @@ parchment.transcript = {
 		// is the transcript saving server offline?
 		serverOffline: false,
 		
-		send: function( window, styles, text ) {
+		/*
+		 * Send the transcript collected so far
+		 */
+		send: function( window, styles, text, cache ) {
 			var self = this;
-			var $ = jQuery;	// prevents collisions with Prototype
 			
 			if( !this.collectTranscripts() ) {
 				return;
@@ -48,33 +51,61 @@ parchment.transcript = {
 			if( typeof( text ) != 'undefined' ) {
 				self.output = text;
 			}
-			
-			var jsonData = $.toJSON( 
-					{
-					   'session': self.sessionId,
-					   'log': {
-					         'inputcount': self.inputcount,
-					         'outputcount': self.outputcount,
-					         'input': self.command.input,
-					         'output': self.output,
-					         'window': self.window,
-					         'styles': self.styles,
-					         'timestamp': new Date().getTime()
-					      }
-					}
-			);
+						
+			var jsonData =  
+				{
+				   'session': self.sessionId,
+				   'log': {
+				         'inputcount': self.inputcount,
+				         'outputcount': self.outputcount,
+				         'input': self.command.input,
+				         'output': self.output,
+				         'window': self.window,
+				         'styles': self.styles,
+				         'timestamp': new Date().getTime()
+				      }
+				};
+		
 			
 			// console.log( "JSON: "+jsonData );
 			
-			$.ajax( {
-				type: 'POST',
-				url: self.saveUrl,
-				data: { data: jsonData }			
-			} );
+			if( cache ) {
+				self.cache.push( jsonData );
+			}
+			else {
+				var sendData = jsonData;
+				
+				if( self.cache.length > 0 ) {
+					sendData = self.cache.length;
+					sendData.push( jsonData );
+					self.cache = [];
+				}
+				
+				jQuery.ajax( {
+					type: 'POST',
+					url: self.saveUrl,
+					data: { data: sendData }		
+				} );
+			}
 
 			// clearing the buffer for next turn
 			self.output = '';
 			self.outputcount++;
+		},
+		
+		/*
+		 * Send the collected cache
+		 */
+		sendCache: function() {
+			var self = this;
+			if( this.collectTranscripts() && self.cache.length > 0 ) {
+				jQuery.ajax( {
+					type: 'POST',
+					url: self.saveUrl,
+					data: { data: self.cache }		
+				} );
+				self.cache = [];
+			}
 		},
 		
 		/*
@@ -92,7 +123,6 @@ parchment.transcript = {
 		
 		initialize: function( url ) {
 			var self = this;
-			var $ = jQuery;	// prevents collisions with Prototype
 			
 			if( typeof( url ) == 'string' ) {
 				self.saveUrl = url;
@@ -126,7 +156,7 @@ parchment.transcript = {
 				return false;
 			}
 			
-			var browserString = $.browser.name+' '+$.browser.version+' '+$.os.name; 
+			var browserString = jQuery.browser.name+' '+jQuery.browser.version+' '+jQuery.os.name; 
 
 			// there doesn't seem to be an easy way to find out which engine
 			// is or will be running at this point. 
@@ -135,17 +165,16 @@ parchment.transcript = {
 				engine = ENGINE_DESCRIPTION;
 			} */
 			
-			var initString = $.toJSON( {
+			var initString = {
 					'session': self.sessionId,
 					'start': {
 						'story': self.story,
 						'interpreter': 'Parchment',	// TODO: Does Parchment have version numbers? 
 						'browser': browserString
 					}
-				}
-			);
+				};
 			
-			$.ajax( {
+			jQuery.ajax( {
 				type: 'POST',
 				url: self.saveUrl,
 				data: { data: initString },
@@ -164,30 +193,77 @@ parchment.transcript = {
 		},
 		
 		charName: function( keyCode ) {
-			switch( keyCode ) {
-				case 8:
+			// the hex values are Glulx keycodes
+			switch( keyCode ) { 
+		    	case Event.KEY_BACKSPACE:
 					return '<backspace>';
-				case 9:
+		    	case 0xfffffff9:
+		    		return '<backspace/delete>'; // apparently Glulx doesn't make a difference
+			    case Event.KEY_TAB:
+			    case 0xfffffff7:
 					return '<tab>';
 				case 13:
+				case 0xfffffffa:
 					return '<enter>';
-				case 27:
+			    case Event.KEY_ESC:
+			    case 0xfffffff8:
 					return '<esc>';
 				case 32:
 					return '<space>';
-				case 37:
+			    case Event.KEY_LEFT:
+			    case 0xfffffffe:
 					return '<left>';
-				case 38:
+			    case Event.KEY_UP:
+			    case 0xfffffffc:
 					return '<up>';
-				case 39:
+			    case Event.KEY_RIGHT:
+			    case 0xfffffffd:
 					return '<right>';
-				case 40:
-					return '<down>';
+			    case Event.KEY_DOWN:
+			    case 0xfffffffb:
+			    	return '<down>';
 				case 46:
 					return '<del>';
+			    case Event.KEY_PAGEUP:
+			    case 0xfffffff6:
+			    	return '<pgup>';
+			    case Event.KEY_PAGEDOWN:
+			    case 0xfffffff5:
+			    	return '<pgdown>';
+			    case Event.KEY_HOME:
+			    case 0xfffffff4:
+			    	return '<home>';
+			    case Event.KEY_END:
+			    case 0xfffffff3:
+			    	return '<end>';
+			    case 0xffffffef:
+			    	return '<F1>';
+			    case 0xffffffee:
+			    	return '<F2>';
+			    case 0xffffffed:
+			    	return '<F3>';
+			    case 0xffffffec:
+			    	return '<F4>';
+			    case 0xffffffeb:
+			    	return '<F5>';
+			    case 0xffffffea:
+			    	return '<F6>';
+			    case 0xffffffe9:
+			    	return '<F7>';
+			    case 0xffffffe8:
+			    	return '<F8>';
+			    case 0xffffffe7:
+			    	return '<F9>';
+			    case 0xffffffe6:
+			    	return '<F10>';
+			    case 0xffffffe5:
+			    	return '<F11>';
+			    case 0xffffffe4:
+			    	return '<F12>';
 				default:
 					return String.fromCharCode( keyCode );
 			}
+			
 		}
 };
 
@@ -229,10 +305,13 @@ $( document ).bind(
 $( document ).bind(
 		'GlkOutput',
 		function( data ) {
-			for( var i = 0; i < data.output.size(); ++i ) {
-				console.log( 'i'+i+': '+data.output[ i ].toSource() );
+			if( data.output == undefined ) {
+				return;
+			}
+			for( var i = 0; i < data.output.length; ++i ) {
+//				console.log( 'i'+i+': '+data.output[ i ].toSource() );
 				
-				for( var j = 0; j < data.output[ i ].text.size(); ++j ) {
+				for( var j = 0; j < data.output[ i ].text.length; ++j ) {
 					parchment.transcript.styles = '';
 					parchment.transcript.output = "\n";
 					
@@ -243,14 +322,15 @@ $( document ).bind(
 							if( k == data.output[ i ].text[ j ].content.size() - 2 ) {
 								parchment.transcript.output += "\n";
 							}
-							parchment.transcript.send();
+							parchment.transcript.send( parchment.transcript.window, parchment.transcript.styles, parchment.transcript.output, true );
 						}
 					}
 					else {
-						parchment.transcript.send();
+						parchment.transcript.send( parchment.transcript.window, parchment.transcript.styles, parchment.transcript.output, true );
 					}
 				}
 			}
+			parchment.transcript.sendCache();
 		}
 );
 
@@ -306,7 +386,7 @@ var firstTextOutputHandler = function( data ) {
 
 $( document ).bind( 'TextOutput', firstTextOutputHandler );
 
-});
+}(jQuery));
 
 
 

@@ -9,7 +9,7 @@
 </head>
 <body>
 <?php 
-include_once( '../db.php' );
+include_once( '../include/db.php' );
 
 $query = $db->query( "SELECT * FROM {$dbSettings[ 'prefix' ]}stories WHERE 1 ORDER BY started DESC" ) or database_error( $db->errorInfo() );
 
