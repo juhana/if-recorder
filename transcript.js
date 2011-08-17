@@ -148,9 +148,6 @@ parchment.transcript = {
 			if( self.story == '' ) {
 				self.story = '(unknown)';
 			}
-			else {
-				console.log( 'story: '+self.story );
-			}
 			
 			if( !self.collectTranscripts() ) {
 				return false;
