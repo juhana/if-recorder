@@ -87,5 +87,5 @@ function display_transcript( $db, $session, $options ) {
 	
 	$transcript .= $gameText;
 	 
-	return $transcript;
+	return stripslashes( $transcript );
 }
