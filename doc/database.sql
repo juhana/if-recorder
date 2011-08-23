@@ -7,6 +7,7 @@ CREATE TABLE `stories` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `session` varchar(255) NOT NULL,
   `story` varchar(255) NOT NULL,
+  `version` varchar(255) DEFAULT '',
   `started` datetime DEFAULT NULL,
   `ended` datetime DEFAULT NULL,
   `inputcount` int(11) DEFAULT '0',
