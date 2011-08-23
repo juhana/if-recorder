@@ -13,6 +13,7 @@ CREATE TABLE `stories` (
   `inputcount` int(11) DEFAULT '0',
   `browser` varchar(255) DEFAULT NULL,
   `interpreter` varchar(255) DEFAULT NULL,
+  `info` text DEFAULT '',
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8 ;
 
@@ -31,4 +32,10 @@ CREATE TABLE `transcripts` (
   `styles` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8 ;
+
+
+# Upgrading a database from 2.1.1 and earlier:
+#
+# ALTER TABLE `stories` ADD `version` varchar(255) DEFAULT '' AFTER `story`;
+# ALTER TABLE `stories` ADD `info` text DEFAULT '' AFTER `interpreter`;
 

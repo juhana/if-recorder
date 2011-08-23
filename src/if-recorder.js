@@ -7,7 +7,7 @@ Parchment Transcript Recording Plugin
 	* Copyright: Copyright (c) 2011 Juhana Leinonen under MIT license.
 **/
 
-parchment.transcript = {
+var ifRecorder = {
 		sessionId: (new Date().getTime())+""+( Math.ceil( Math.random() * 1000 ) ),
 		command: { input: '', timestamp: 0 },
 		output: '',
@@ -24,7 +24,15 @@ parchment.transcript = {
 		outputcount: 1,
 		styles: '',
 		saveUrl: '',
-		story: '',
+		story: {
+		    name: '',
+		    version: ''
+		},
+		// additional information saved with the transcript
+		info: '', 
+		
+		// currently Undum and Parchment are supported 
+		interpreter: ( typeof parchment != 'undefined' ? 'Parchment' : 'Undum' ),
 
 		// the player can opt out by having feedback=0 in the url
 		optOut: ( typeof( getUrlVars()[ 'feedback' ] ) != 'undefined' && getUrlVars()[ 'feedback' ] != '1' ),
@@ -124,29 +132,40 @@ parchment.transcript = {
 		initialize: function( url ) {
 			var self = this;
 			
-			if( typeof( url ) == 'string' ) {
+			if( typeof url == 'string' ) {
 				self.saveUrl = url;
+			}
+			
+			// Fill story name + version from Undum variables
+			if( typeof undum != 'undefined' ) {
+			    if( self.story.name == '' ) {
+			        self.story.name = undum.game.id;
+			    }
+			    
+			    if( self.story.version == '' ) {
+			        self.story.version = undum.game.version;
+			    }
 			}
 
 			// If story name hasn't been given, set it to the file name.
 			// This will not work with the archive search thing.
-			if( self.story == '' ) {
+			if( self.story.name == '' ) {
 				if( typeof( parchment.options.default_story ) != 'undefined' && parchment.options.default_story != '' ) {
-					self.story = parchment.options.default_story;
+					self.story.name = parchment.options.default_story;
 					
 					if( !parchment.options.lock_story && typeof( getUrlVars()[ 'story' ] ) != 'undefined' && getUrlVars()[ 'story' ] != '' ){
-						self.story = getUrlVars()[ 'story' ];
+						self.story.name = getUrlVars()[ 'story' ];
 					} 
 				}
 				else {
 					if( !parchment.options.lock_story && typeof( getUrlVars()[ 'story' ] ) != 'undefined' && getUrlVars()[ 'story' ] != '' ){
-						self.story = getUrlVars()[ 'story' ];
+						self.story.name = getUrlVars()[ 'story' ];
 					} 
 				}
 			}
 			
-			if( self.story == '' ) {
-				self.story = '(unknown)';
+			if( self.story.name == '' ) {
+				self.story.name = '(unknown)';
 			}
 			
 			if( !self.collectTranscripts() ) {
@@ -165,9 +184,10 @@ parchment.transcript = {
 			var initString = {
 					'session': self.sessionId,
 					'start': {
-						'story': self.story,
-						'version': self.storyVersion,
-						'interpreter': 'Parchment',	// TODO: Does Parchment have version numbers? 
+						'story': self.story.name,
+						'version': self.story.version,
+                        'info': self.info,
+						'interpreter': self.interpreter,
 						'browser': browserString
 					}
 				};
@@ -262,6 +282,23 @@ parchment.transcript = {
 					return String.fromCharCode( keyCode );
 			}
 			
+		},
+		
+		/**
+		 * Undum-specific functions
+		 */
+		undum: {
+		    oldContentLength: 0,
+		    prepare: function( link ) {
+		        var self = ifRecorder;
+		        self.command.input = link;
+		        this.oldContentLength = jQuery( '#content' ).html().length;
+		    },
+		    send: function( link ) {
+		        var self = ifRecorder;
+		        self.output = jQuery( '#content' ).html().substring( this.oldContentLength );
+		        self.send();
+		    }
 		}
 };
 
@@ -273,8 +310,8 @@ $( document ).bind(
 		'LineInput', 
 		function( command ) {
 //			console.log( 'cmd: '+command.toSource() );
-			parchment.transcript.command = command;
-			parchment.transcript.inputcount++;
+		    ifRecorder.command = command;
+		    ifRecorder.inputcount++;
 		} 
 	);
 
@@ -282,9 +319,9 @@ $( document ).bind(
 		'CharInput', 
 		function( command ) { 
 //			console.log( 'charcmd: '+command.toSource() );
-			parchment.transcript.command = command;
-			parchment.transcript.command.input = parchment.transcript.charName( command.input.keyCode );
-			parchment.transcript.inputcount++;
+		    ifRecorder.command = command;
+		    ifRecorder.command.input = ifRecorder.charName( command.input.keyCode );
+		    ifRecorder.inputcount++;
 		} 
 	);
 
@@ -294,7 +331,7 @@ $( document ).bind(
 		'TextOutput',
 		function( data ) {
 			if( data.output.window == 0 ) {
-				parchment.transcript.send( data.output.window, data.output.styles, data.output.text );
+			    ifRecorder.send( data.output.window, data.output.styles, data.output.text );
 			}
 		}
 );
@@ -310,25 +347,25 @@ $( document ).bind(
 //				console.log( 'i'+i+': '+data.output[ i ].toSource() );
 				
 				for( var j = 0; j < data.output[ i ].text.length; ++j ) {
-					parchment.transcript.styles = '';
-					parchment.transcript.output = "\n";
+					ifRecorder.styles = '';
+					ifRecorder.output = "\n";
 					
 					if( typeof( data.output[ i ].text[ j ].content ) != 'undefined' ) {
 						for( var k = 0; k < data.output[ i ].text[ j ].content.size(); k += 2 ) {
-							parchment.transcript.styles = data.output[ i ].text[ j ].content[ k ];
-							parchment.transcript.output = data.output[ i ].text[ j ].content[ k+1 ];
+							ifRecorder.styles = data.output[ i ].text[ j ].content[ k ];
+							ifRecorder.output = data.output[ i ].text[ j ].content[ k+1 ];
 							if( k == data.output[ i ].text[ j ].content.size() - 2 ) {
-								parchment.transcript.output += "\n";
+								ifRecorder.output += "\n";
 							}
-							parchment.transcript.send( parchment.transcript.window, parchment.transcript.styles, parchment.transcript.output, true );
+							ifRecorder.send( ifRecorder.window, ifRecorder.styles, ifRecorder.output, true );
 						}
 					}
 					else {
-						parchment.transcript.send( parchment.transcript.window, parchment.transcript.styles, parchment.transcript.output, true );
+						ifRecorder.send( ifRecorder.window, ifRecorder.styles, ifRecorder.output, true );
 					}
 				}
 			}
-			parchment.transcript.sendCache();
+			ifRecorder.sendCache();
 		}
 );
 
@@ -356,7 +393,7 @@ var firstTextOutputHandler = function( data ) {
       for (var x = 0; x < this.width; x++) {
         if (this._styles[y][x] !== currStyle) {
           if (currStyle !== null) {
-  			parchment.transcript.send( 1, currStyle, currString.replace( /\&nbsp\;/gi, ' ') );
+  			ifRecorder.send( 1, currStyle, currString.replace( /\&nbsp\;/gi, ' ') );
 			currString = '';
             string += "</span>";
           }
@@ -370,7 +407,7 @@ var firstTextOutputHandler = function( data ) {
       }
       if (currStyle !== null) {
         string += "</span>";
-		parchment.transcript.send( 1, currStyle, currString.replace( /\&nbsp\;/gi, ' ' )+"\n" );
+		ifRecorder.send( 1, currStyle, currString.replace( /\&nbsp\;/gi, ' ' )+"\n" );
 		currString = '';
       }
       string += "<br/>";

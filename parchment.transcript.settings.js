@@ -1,5 +1,5 @@
 /**
- * Settings for Parchment transcript recording plugin.
+ * Parchment-specific settings for the transcript recording plugin.
  */
 
 
@@ -14,7 +14,7 @@ parchment.options.default_story = "";
  * 
  * If this option is left blank, transcript recording will NOT begin.
  */
-parchment.transcript.saveUrl = "tools/server/save-sql.php";
+ifRecorder.saveUrl = "tools/server/save-sql.php";
 
 
 /**
@@ -28,13 +28,20 @@ parchment.options.lock_story = true;
 /**
  * Story name used as an identifier. If left empty, the story file URL is used.  
  */
-parchment.transcript.story = "";
+ifRecorder.story.name = "";
 
 
 /**
  * The version number of the current story (optional).
  */
-parchment.transcript.storyVersion = "";
+ifRecorder.story.version = "";
+
+
+/**
+ * If you want to add some aditional information to the saved data,
+ * add it here.
+ */
+ifRecorder.info = "";
 
 
 /**
