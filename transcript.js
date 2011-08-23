@@ -166,6 +166,7 @@ parchment.transcript = {
 					'session': self.sessionId,
 					'start': {
 						'story': self.story,
+						'version': self.storyVersion,
 						'interpreter': 'Parchment',	// TODO: Does Parchment have version numbers? 
 						'browser': browserString
 					}

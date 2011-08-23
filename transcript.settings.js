@@ -32,6 +32,13 @@ parchment.transcript.story = "";
 
 
 /**
+ * The version number of the current story (optional).
+ */
+parchment.transcript.storyVersion = "";
+
+
+/**
  * Start the transcript recording.
+ * (do not edit unless you know what you're doing)
  */	
 $(document).ready(function(){ parchment.transcript.initialize(); });

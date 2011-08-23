@@ -40,6 +40,7 @@ if( !empty( $data[ 'start' ] ) ) {
 			"INSERT INTO {$dbSettings[ 'prefix' ]}stories 
 				SET session = ?,
 				story = ?,
+				version = ?,
 				interpreter = ?,
 				browser = ?,
 				started = ?"
@@ -59,10 +60,18 @@ if( !empty( $data[ 'start' ] ) ) {
 			$browser = $data[ 'start' ][ 'browser' ];
 		}
 		
+		if( empty( $data[ 'start' ][ 'version' ] ) ) {
+			$storyVersion = '';
+		}
+		else {
+			$storyVersion = $data[ 'start' ][ 'version' ];
+		}
+		
 		$insert->execute( 
 			array(
 				$data[ 'session' ],
 				$data[ 'start' ][ 'story' ],
+				$storyVersion,
 				$interpreter,
 				$browser,
 				date( 'Y-m-d H:i:s' )
