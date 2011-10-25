@@ -296,6 +296,7 @@ var ifRecorder = {
 		    },
 		    send: function( link ) {
 		        var self = ifRecorder;
+		        self.inputcount++;
 		        self.output = jQuery( '#content' ).html().substring( this.oldContentLength );
 		        self.send();
 		    }

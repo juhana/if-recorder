@@ -51,11 +51,18 @@ function display_transcript( $db, $session, $options ) {
 			}
 			$prevInputCount = $snippet[ 'inputcount' ];
 		}
-	
+
+		if( empty( $options[ 'escapeHTML' ] ) ) {
+			$output = $snippet[ 'output' ];
+		}
+		else {
+			$output = htmlentities( $snippet[ 'output' ] );
+		}
+				
 		if( $snippet[ 'window' ] == 0 ) {
 			if( $html ) {
 				$gameText .= '<span class="'.$snippet[ 'styles' ].'">';
-				$gameText .= nl2br( str_replace( '  ', '&nbsp; ', str_replace( '  ', '&nbsp; ', htmlentities( $snippet[ 'output' ] ) ) ) );
+				$gameText .= nl2br( str_replace( '  ', '&nbsp; ', str_replace( '  ', '&nbsp; ', $output ) ) );
 				$gameText .= '</span>';
 			}
 			else {
@@ -66,7 +73,7 @@ function display_transcript( $db, $session, $options ) {
 		if( $snippet[ 'window' ] == 1 ) {
 			if( $html ) {
 				$statusLineText .= '<span class="'.$snippet[ 'styles' ].'">';
-				$statusLineText .= nl2br( str_replace( ' ', '&nbsp;', htmlentities( $snippet[ 'output' ] ) ) );
+				$statusLineText .= nl2br( str_replace( ' ', '&nbsp;', htmlentities( $output ) ) );
 				$statusLineText .= '</span>';
 			}
 			else {
