@@ -3,7 +3,12 @@ import glob
 import shutil
 
 destination = os.path.abspath( '../inform7/Recording Parchment' )
-files = glob.glob( os.path.abspath( "../lib/*.js" ) )
+
+# location of Parchment main files
+files = ( glob.glob( os.path.abspath( "../../parchment/lib/*.min.js" ) ) )
+
+# add recorder files
+files.extend( glob.glob( os.path.abspath( "../lib/*.min.js" ) ) )
 
 # create the manifest file
 shutil.copy( '(manifest).txt.template', destination+'/(manifest).txt' )
