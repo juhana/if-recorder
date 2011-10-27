@@ -59,33 +59,27 @@ var ifRecorder = {
 			if( typeof( text ) != 'undefined' ) {
 				self.output = text;
 			}
-						
-			var jsonData =  
-				{
-				   'session': self.sessionId,
-				   'log': {
-				         'inputcount': self.inputcount,
-				         'outputcount': self.outputcount,
-				         'input': self.command.input,
-				         'output': self.output,
-				         'window': self.window,
-				         'styles': self.styles,
-				         'timestamp': new Date().getTime()
-				      }
-				};
-		
-			
-			// console.log( "JSON: "+jsonData );
+					
+			var sendData = {
+			   'session': self.sessionId,
+			   'log': {
+			         'inputcount': self.inputcount,
+			         'outputcount': self.outputcount,
+			         'input': self.command.input,
+			         'output': self.output,
+			         'window': self.window,
+			         'styles': self.styles,
+			         'timestamp': new Date().getTime()
+			      }
+			};
 			
 			if( cache ) {
-				self.cache.push( jsonData );
+				self.cache.push( sendData );
 			}
 			else {
-				var sendData = jsonData;
-				
 				if( self.cache.length > 0 ) {
-					sendData = self.cache.length;
-					sendData.push( jsonData );
+					self.cache.push( sendData );
+					sendData = self.cache;
 					self.cache = [];
 				}
 				
@@ -106,6 +100,7 @@ var ifRecorder = {
 		 */
 		sendCache: function() {
 			var self = this;
+			
 			if( this.collectTranscripts() && self.cache.length > 0 ) {
 				jQuery.ajax( {
 					type: 'POST',
@@ -341,28 +336,29 @@ $( document ).bind(
 $( document ).bind(
 		'GlkOutput',
 		function( data ) {
-			if( data.output == undefined ) {
+			if( typeof data.output === 'undefined' ) {
 				return;
 			}
+
 			for( var i = 0; i < data.output.length; ++i ) {
-//				console.log( 'i'+i+': '+data.output[ i ].toSource() );
-				
-				for( var j = 0; j < data.output[ i ].text.length; ++j ) {
-					ifRecorder.styles = '';
-					ifRecorder.output = "\n";
-					
-					if( typeof( data.output[ i ].text[ j ].content ) != 'undefined' ) {
-						for( var k = 0; k < data.output[ i ].text[ j ].content.size(); k += 2 ) {
-							ifRecorder.styles = data.output[ i ].text[ j ].content[ k ];
-							ifRecorder.output = data.output[ i ].text[ j ].content[ k+1 ];
-							if( k == data.output[ i ].text[ j ].content.size() - 2 ) {
-								ifRecorder.output += "\n";
+				if( typeof data.output[ i ].text !== 'undefined' ) {
+					for( var j = 0; j < data.output[ i ].text.length; ++j ) {
+						ifRecorder.styles = '';
+						ifRecorder.output = "\n";
+						
+						if( typeof( data.output[ i ].text[ j ].content ) != 'undefined' ) {
+							for( var k = 0; k < data.output[ i ].text[ j ].content.size(); k += 2 ) {
+								ifRecorder.styles = data.output[ i ].text[ j ].content[ k ];
+								ifRecorder.output = data.output[ i ].text[ j ].content[ k+1 ];
+								if( k == data.output[ i ].text[ j ].content.size() - 2 ) {
+									ifRecorder.output += "\n";
+								}
+								ifRecorder.send( ifRecorder.window, ifRecorder.styles, ifRecorder.output, true );
 							}
+						}
+						else {
 							ifRecorder.send( ifRecorder.window, ifRecorder.styles, ifRecorder.output, true );
 						}
-					}
-					else {
-						ifRecorder.send( ifRecorder.window, ifRecorder.styles, ifRecorder.output, true );
 					}
 				}
 			}
