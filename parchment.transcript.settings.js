@@ -1,5 +1,5 @@
 /**
- * Parchment-specific settings for the transcript recording plugin.
+ * Parchment-specific settings for the IF Recorder plugin.
  */
 
 
@@ -48,4 +48,4 @@ ifRecorder.info = "";
  * Start the transcript recording.
  * (do not edit unless you know what you're doing)
  */	
-$(document).ready(function(){ parchment.transcript.initialize(); });
+$(function(){ ifRecorder.initialize(); });
