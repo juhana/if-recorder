@@ -7,6 +7,12 @@ function display_transcript( $db, $session, $options ) {
 	$statusLineText = '';
 	
 	$html = ( $options[ 'output' ] == 'html' );
+	 
+	$query = $db->prepare( 'SELECT interpreter FROM stories WHERE session = ? LIMIT 1' );
+	$query->execute( array( $session ) ) or database_error( $query->errorInfo() );
+	
+	$engineData = $query->fetch() or server_error( 'Unknown session ID' );
+	$engine = $engineData[ 'interpreter' ];
 	
 	$query = $db->prepare( 'SELECT * FROM transcripts WHERE session = ? ORDER BY outputcount ASC' );
 	$query->execute( array( $session ) ) or database_error( $query->errorInfo() );
@@ -58,9 +64,9 @@ function display_transcript( $db, $session, $options ) {
 		else {
 			$output = htmlentities( $snippet[ 'output' ] );
 		}
-				
+
 		if( $snippet[ 'window' ] == 0 ) {
-			if( $html ) {
+			if( $html && $engine != 'Undum' ) {
 				$gameText .= '<span class="'.$snippet[ 'styles' ].'">';
 				$gameText .= nl2br( str_replace( '  ', '&nbsp; ', str_replace( '  ', '&nbsp; ', $output ) ) );
 				$gameText .= '</span>';
