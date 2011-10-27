@@ -7,6 +7,10 @@ destination = os.path.abspath( '../inform7/Recording Parchment' )
 # location of Parchment main files
 files = ( glob.glob( os.path.abspath( "../../parchment/lib/*.min.js" ) ) )
 
+# css files
+files.extend( glob.glob( os.path.abspath( "../../parchment/src/quixe/media/*.css" ) ) )
+files.append( os.path.abspath( "../../parchment/parchment.css" ) )
+
 # add recorder files
 files.extend( glob.glob( os.path.abspath( "../lib/*.min.js" ) ) )
 

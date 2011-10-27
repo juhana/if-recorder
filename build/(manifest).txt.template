@@ -13,7 +13,7 @@ Parchment for Inform 7
 []
 
 [INTERPRETERURL]
-http://iplayif.com
+http://parchment.googlecode.com
 []
 
 ! Note that we don't set [INTERPRETER]: cBlorb has already set that to the
@@ -46,8 +46,10 @@ zg
 [INTERPRETERHEAD]
 	<script src="interpreter/jquery.min.js"></script>
 	<script src="interpreter/parchment.min.js"></script>
-	<script src="interpreter/parchment.transcript.min.js"></script>
+	<script src="interpreter/if-recorder.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="interpreter/parchment.css">
+	<link rel="stylesheet" type="text/css" href="interpreter/i7-glkote.css">
+	<link rel="stylesheet" type="text/css" href="interpreter/dialog.css">
 	<script>
 		parchment_options = {
 			default_story: [ "[STORYFILE]", "interpreter/[ENCODEDSTORYFILE]" ],
