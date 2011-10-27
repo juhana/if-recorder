@@ -58,6 +58,11 @@ function display_transcript( $db, $session, $options ) {
 			$prevInputCount = $snippet[ 'inputcount' ];
 		}
 		
+		// Don't repeat the command in Glulx games
+		if( $snippet[ 'styles' ] == 'input' ) {
+			continue;
+		}
+		
 		if( !empty( $options[ 'escapeHTML' ] ) ) {
 			$output = htmlspecialchars( $snippet[ 'output' ] );
 		}
