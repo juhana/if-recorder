@@ -2,7 +2,7 @@
 // Database connection settings. Edit these to match your settings.
 $dbSettings = array(
 	'host'		=> 'localhost',
-	'database'	=> 'parchment',
+	'database'	=> 'transcripts',
 	'username'	=> 'root',
 	'password'	=> 'root',
 	'prefix'	=> ''	// if your web site provider forces prefixes in table names, write the prefix here
@@ -39,6 +39,8 @@ try {
 $consoleMode = ( php_sapi_name() == 'cli' && empty( $_SERVER[ 'REMOTE_ADDR' ] ) );
 
 function server_error( $text ) {
+    global $consoleMode;
+    
 	if( $consoleMode ) {
 		// print to stderr instead of stdout
 		file_put_contents( 'php://stderr', $text."\n\n" );
