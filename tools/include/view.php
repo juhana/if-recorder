@@ -57,12 +57,15 @@ function display_transcript( $db, $session, $options ) {
 			}
 			$prevInputCount = $snippet[ 'inputcount' ];
 		}
-
-		if( empty( $options[ 'escapeHTML' ] ) ) {
-			$output = $snippet[ 'output' ];
+		
+		if( !empty( $options[ 'escapeHTML' ] ) ) {
+			$output = htmlspecialchars( $snippet[ 'output' ] );
 		}
+		else if( !empty( $options[ 'stripHTML' ] ) ) {
+			$output = strip_tags( $snippet[ 'output' ] );
+	    }
 		else {
-			$output = htmlentities( $snippet[ 'output' ] );
+			$output = $snippet[ 'output' ];
 		}
 
 		if( $snippet[ 'window' ] == 0 ) {
@@ -72,7 +75,7 @@ function display_transcript( $db, $session, $options ) {
 				$gameText .= '</span>';
 			}
 			else {
-				$gameText .= $snippet[ 'output' ];
+				$gameText .= $output;
 			}
 		}
 		
@@ -83,7 +86,7 @@ function display_transcript( $db, $session, $options ) {
 				$statusLineText .= '</span>';
 			}
 			else {
-				$statusLineText .= $snippet[ 'output' ];
+				$statusLineText .= $output;
 			}
 		}
 	}

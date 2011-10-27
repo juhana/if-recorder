@@ -13,7 +13,8 @@ $session = $_GET[ 'session' ];
 $options = array(
 	'warnings'		=> true,
 	'statusline'	=> 'inline',
-	'output'		=> 'html'
+	'output'		=> 'html',
+	'stripHTML'		=> true
 );
 
 // show warnings?
@@ -26,6 +27,9 @@ if( isset( $_GET[ 'statusline' ] ) ) {
 if( isset( $_GET[ 'output' ] ) ) {
 	$options[ 'output' ] = $_GET[ 'output' ];
 }
+
+$options[ 'stripHTML' ] = !( isset( $_GET[ 'stripHTML' ] ) && $_GET[ 'stripHTML' ] == '0' );
+
 
 // tell the browser we're sending plaintext if so requested,
 // otherwise create the HTML page structure
