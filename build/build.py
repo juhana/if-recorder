@@ -49,7 +49,7 @@ call([
     ])
 
 
-#create tools zip
+# create tools zip
 os.chdir( '../' )
 
 call([
@@ -59,6 +59,18 @@ call([
       "tools",
       # exclude OS X's system files
       "-x", '*.DS_Store*'
-      ])
+    ])
+
+# create main zip
+call([
+      "zip",
+      "-rq",
+      releasedir+"/if-recorder-client.zip",
+      "lib",
+      "index.html",
+      "parchment.transcript.settings.js",
+      "LICENSE",
+      "-x", '*.DS_Store*'
+    ])
 
 manifest.close()
